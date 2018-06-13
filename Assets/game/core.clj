@@ -4,15 +4,50 @@
             GameObject Input Rigidbody2D Rigidbody
             Vector2 Mathf Resources Transform
             Collision2D Physics2D]
-           ArcadiaState)
-  (:require [game.movement :as m])
-  )
+           ArcadiaState))
 
-  (def player-roles
-    {::movement {:fixed-update #'game.movement/player-movement-fixed-update}})
+(declare setup)
 
-  (defn setup []
-    (let [player  (object-named "unitychan")]
-    ;  (reset! fighter-atom fighter)
-      (roles+ player player-roles)
-      )) ; NEW
+(defn bearing-vector [angle]
+  (let [angle (* Mathf/Deg2Rad angle)]
+    (v3 (Mathf/Cos angle) (Mathf/Sin angle) 1)))
+
+(defn abs-angle [v]
+  (* Mathf/Rad2Deg
+     (Mathf/Atan2 (.y v) (.x v))))
+
+(defn controller-vector []
+ (v2 (Input/GetAxis "Horizontal")
+     (Input/GetAxis "Vertical")))
+
+(defn wasd-key []
+  (or (Input/GetKey "w")
+      (Input/GetKey "a")
+      (Input/GetKey "s")
+      (Input/GetKey "d")))
+
+(defn move []
+ (v3 (Input/GetAxis "Horizontal") 0 (Input/GetAxis "Vertical")))
+
+(defn player-movement-fixed-update [obj k] ; We'll only use the `obj` parameter
+  (with-cmpt obj [rb Rigidbody]          ; Gets the Rigidbody2D component
+    (when (wasd-key)
+     (set! (.velocity rb) (move))
+     (. rb (AddForce (move))))))
+
+(def player-roles
+  {::movement {:fixed-update #'player-movement-fixed-update}})
+
+(def gamemaster-roles
+    {::setup {:start #'setup}})
+
+(defn game-master-setup []
+  (let [gamemaster  (object-named "GameMaster")]
+    (roles+ gamemaster gamemaster-roles)
+    ))
+
+(defn setup []
+  (let [player  (object-named "unitychan")]
+  ;  (reset! fighter-atom fighter)
+    (roles+ player player-roles)
+    )) ; NEW
