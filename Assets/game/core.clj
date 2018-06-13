@@ -46,7 +46,7 @@
     (roles+ gamemaster gamemaster-roles)
     ))
 
-(defn setup []
+(defn setup [_ _]
   (let [player  (object-named "unitychan")]
   ;  (reset! fighter-atom fighter)
     (roles+ player player-roles)
