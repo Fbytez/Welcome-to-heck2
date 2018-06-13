@@ -24,12 +24,12 @@
        (Input/GetKey "s")
        (Input/GetKey "d")))
 
+(defn move []
+  (v3 (Input/GetAxis "Horizontal") 0 (Input/GetAxis "Vertical")))
+
  (defn player-movement-fixed-update [obj k] ; We'll only use the `obj` parameter
    (with-cmpt obj [rb Rigidbody]          ; Gets the Rigidbody2D component
-     (when (wasd-key)                       ; Checks for WASD key
-       (.MoveRotation rb (abs-angle (controller-vector))) ; Rotates towards key
-       (set! (.angularVelocity rb) 0)
-       (.AddForce rb                                      ; Moves forwards
-         (v3* (bearing-vector (.rotation rb))
-              3
-              )))))
+     (when (wasd-key)
+      (set! (.velocity rb) (move))
+
+    )))
