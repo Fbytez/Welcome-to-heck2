@@ -81,8 +81,8 @@
     ))
 
 (defn setup [_ _]
-  (let [player  (object-named "unitychan")
-        player2 (object-named "unitychan2")
+  (let [player  (object-named "WoodenBall")
+        player2 (object-named "WoodenBall2")
         cam1 (object-named "player1-cam")
         cam2 (object-named "player2-cam")]
 
