@@ -3,7 +3,7 @@
   (:import [UnityEngine Collider2D Physics
             GameObject Input Rigidbody2D Rigidbody
             Vector2 Mathf Resources Transform
-            Collision2D Physics2D]
+            Collision2D Physics2D Time]
            ArcadiaState))
 
 (declare setup)
@@ -39,7 +39,7 @@
       (Input/GetKey "l")))
 
 (defn move_P1 []
- (v3 (Input/GetAxis "Horizontal_P1") 0 (Input/GetAxis "Vertical_P1")))
+ (v3  (Input/GetAxis "Horizontal_P1") 0 (Input/GetAxis "Vertical_P1")))
 
  (defn move_P2 []
   (v3 (Input/GetAxis "Horizontal_P2") 0 (Input/GetAxis "Vertical_P2")))
@@ -58,6 +58,8 @@
           (set! (.velocity rb) (move_P2))
           (. rb (AddForce (move_P2))))))
 
+
+
 (def player-roles
   {::movement {:fixed-update #'player-movement-fixed-update}})
 
@@ -67,6 +69,12 @@
 (def gamemaster-roles
     {::setup {:start #'setup}})
 
+(defn follow-player-role [obj k]
+  (with-cmpt obj [t Transform]
+    (as-> (v3+ (.position (cmpt (:player (state obj k)) UnityEngine.Transform)) (:offset (state obj k))) $
+            (set! (.position t) $))))
+
+
 (defn game-master-setup []
   (let [gamemaster  (object-named "GameMaster")]
     (roles+ gamemaster gamemaster-roles)
@@ -74,8 +82,24 @@
 
 (defn setup [_ _]
   (let [player  (object-named "unitychan")
-        player2 (object-named "unitychan2")]
-  ;  (reset! fighter-atom fighter)
+        player2 (object-named "unitychan2")
+        cam1 (object-named "player1-cam")
+        cam2 (object-named "player2-cam")]
+
+        (roles+ cam1
+            {::follow-player
+               {:state {:player player
+                        :offset (v3- (.position (cmpt (object-named "player1-cam") UnityEngine.Transform))
+                                     (.position (cmpt (object-named "unitychan") UnityEngine.Transform)))}
+                :update #'follow-player-role}})
+
+                (roles+ cam2
+                    {::follow-player
+                       {:state {:player player2
+                                :offset (v3- (.position (cmpt (object-named "player2-cam") UnityEngine.Transform))
+                                             (.position (cmpt (object-named "unitychan2") UnityEngine.Transform)))}
+                        :update #'follow-player-role}})
+
     (roles+ player player-roles)
     (roles+ player2 player-roles2)
     )) ; NEW
