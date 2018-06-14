@@ -3,7 +3,7 @@
   (:import [UnityEngine Collider2D Physics
             GameObject Input Rigidbody2D Rigidbody
             Vector2 Mathf Resources Transform
-            Collision2D Physics2D Time]
+            Collision2D Physics2D Time KeyCode]
            ArcadiaState))
 
 (declare setup)
@@ -49,14 +49,14 @@
     (when (wasd-key)
      (set! (.velocity rb) (move_P1))
      (. rb (AddForce (move_P1))))
-    (when (Input/GetKey "x")
-      (set! (.velocity rb) (v3 (0.0, 5.0, 0.0))))))
+     (if (Input/GetKeyUp (KeyCode/Space)) (do (log "aw heck")(. rb (AddForce (v3 0.0 1000.0 0.0)))))))
 
      (defn player2-movement-fixed-update [obj k] ; We'll only use the `obj` parameter
        (with-cmpt obj [rb Rigidbody]          ; Gets the Rigidbody2D component
          (when (ijkl-key)
           (set! (.velocity rb) (move_P2))
-          (. rb (AddForce (move_P2))))))
+          (. rb (AddForce (move_P2)))
+          (if (Input/GetKeyUp (KeyCode/RightControl)) (do (log "aw heck")(. rb (AddForce (v3 0.0 1000.0 0.0))))))))
 
 
 
