@@ -12,13 +12,19 @@
   (let [angle (* Mathf/Deg2Rad angle)]
     (v3 (Mathf/Cos angle) (Mathf/Sin angle) 1)))
 
+
 (defn abs-angle [v]
   (* Mathf/Rad2Deg
      (Mathf/Atan2 (.y v) (.x v))))
 
-(defn controller-vector []
- (v2 (Input/GetAxis "Horizontal")
-     (Input/GetAxis "Vertical")))
+(defn controller-vector-1 []
+ (v2 (Input/GetAxis "Horizontal_P1")
+     (Input/GetAxis "Vertical_P2")))
+
+     (defn controller-vector-2 []
+      (v2 (Input/GetAxis "Horizontal_P2")
+          (Input/GetAxis "Vertical_P2")))
+
 
 (defn wasd-key []
   (or (Input/GetKey "w")
@@ -26,17 +32,37 @@
       (Input/GetKey "s")
       (Input/GetKey "d")))
 
-(defn move []
- (v3 (Input/GetAxis "Horizontal") 0 (Input/GetAxis "Vertical")))
+(defn ijkl-key []
+  (or (Input/GetKey "i")
+      (Input/GetKey "j")
+      (Input/GetKey "k")
+      (Input/GetKey "l")))
+
+(defn move_P1 []
+ (v3 (Input/GetAxis "Horizontal_P1") 0 (Input/GetAxis "Vertical_P1")))
+
+ (defn move_P2 []
+  (v3 (Input/GetAxis "Horizontal_P2") 0 (Input/GetAxis "Vertical_P2")))
 
 (defn player-movement-fixed-update [obj k] ; We'll only use the `obj` parameter
   (with-cmpt obj [rb Rigidbody]          ; Gets the Rigidbody2D component
     (when (wasd-key)
-     (set! (.velocity rb) (move))
-     (. rb (AddForce (move))))))
+     (set! (.velocity rb) (move_P1))
+     (. rb (AddForce (move_P1))))
+    (when (Input/GetKey "x")
+      (set! (.velocity rb) (v3 (0.0, 5.0, 0.0))))))
+
+     (defn player2-movement-fixed-update [obj k] ; We'll only use the `obj` parameter
+       (with-cmpt obj [rb Rigidbody]          ; Gets the Rigidbody2D component
+         (when (ijkl-key)
+          (set! (.velocity rb) (move_P2))
+          (. rb (AddForce (move_P2))))))
 
 (def player-roles
   {::movement {:fixed-update #'player-movement-fixed-update}})
+
+  (def player-roles2
+    {::movement {:fixed-update #'player2-movement-fixed-update}})
 
 (def gamemaster-roles
     {::setup {:start #'setup}})
@@ -47,7 +73,9 @@
     ))
 
 (defn setup [_ _]
-  (let [player  (object-named "unitychan")]
+  (let [player  (object-named "unitychan")
+        player2 (object-named "unitychan2")]
   ;  (reset! fighter-atom fighter)
     (roles+ player player-roles)
+    (roles+ player2 player-roles2)
     )) ; NEW
